@@ -14,9 +14,17 @@ import (
 	"github.com/gobuffalo/plush"
 )
 
+var typeMap map[string]string = map[string]string{
+	"TYPE_STRING": "string",
+	"TYPE_INT32": "int32",
+	"TYPE_INT": "int",
+	"TYPE_INT64": "int64",
+}
+
 type ProtoGen struct {
 	files []string
 	mds map[int32]*desc.MessageDescriptor
+	fds []*desc.FieldDescriptor
 	id2names map[int32]string
 
 }
@@ -66,6 +74,7 @@ func(g *ProtoGen) parse(path string) {
 				if (mid != nil) {
 					g.mds[ *mid.(*int32)] = md
 					g.id2names[*mid.(*int32)] = md.GetName()
+					g.fds = append(g.fds, md.GetFields()...)
 				}
 			}
 		}
@@ -116,6 +125,12 @@ func (g *ProtoGen) generate() {
 	ctx.Set("rbrack", func() string {
 		return "}"
 	})
+
+	for _, fd := range g.fds {
+		fmt.Println(fd.GetType())
+		fmt.Println(fd.GetName())
+		
+	}
 
 	s, err := plush.Render(template, ctx)
 	if (err != nil) {
