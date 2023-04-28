@@ -1,13 +1,16 @@
 package main
 
 import (
+	"strings"
 	"github.com/springstar/protogen/pb"
 	"fmt"
+	"log"
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/golang/protobuf/proto"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/dynamic"
+	"github.com/gobuffalo/plush"
 )
 
 func TestGen(t *testing.T) {
@@ -15,7 +18,6 @@ func TestGen(t *testing.T) {
 	g.parse("msg/protocol")
 
 	for k, v := range g.mds {
-		fmt.Println(k)
 		switch k {
 		case 111:
 			testCSLoing(t, v)
@@ -45,6 +47,46 @@ func TestDispatch(t *testing.T) {
 	md := g.mds[int32(msgid)]
 	assert.NotNil(t, md)
 
+
+}
+
+func TestGenerate(t *testing.T) {
+	template := `
+	<%= for (n) in names { %>
+			<%= decl(n) <%= lbrack() %>
+				<%= "dmsg := dynamic.NewMessage(md)"%>
+			<%= rbrack() %>
+		<% } %>
+	`
+	ctx := plush.NewContext()
+	protos := []string{"CSLogin", "CSQueryCharacter"}
+	ctx.Set("names", protos)
+	ctx.Set("decl", func(p string) string {
+		var sb strings.Builder
+		sb.WriteString("func parse")
+		sb.WriteString(p)
+		sb.WriteString("(id int32, bytes []byte)")
+		sb.WriteString(" *")
+		sb.WriteString(p)
+		return sb.String()
+		
+		
+	})
+
+	ctx.Set("lbrack", func() string {
+		return " {"
+	})
+
+	ctx.Set("rbrack", func() string {
+		return "}"
+	})
+
+	s, err := plush.Render(template, ctx)
+	if (err != nil) {
+		log.Fatal(err)
+	}
+
+	fmt.Println(s)
 
 }
 
