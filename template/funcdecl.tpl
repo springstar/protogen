@@ -7,7 +7,12 @@
 
 <%= for (n) in names { %>
 <%="func parse"%><%=n%>(<%="id int32, bytes []byte"%>) *<%="pb."%><%=n%> {
+    <%= "msg := "%> &<%="pb."%><%=n%>{}
+    <%="md := descriptors[id]"%>
     <%= "dmsg := dynamic.NewMessage(md)"%>
+    <%="dmsg.Unmarshal(bytes)"%>
+    <%="dmsg.ConvertTo(msg)"%>
+    <%="return msg"%>
 }
 <% } %>
 
