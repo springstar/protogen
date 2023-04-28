@@ -1,7 +1,10 @@
 <%= package%>
-<%= for (p) in imports() { %>
-<%= "import "%> "<%=p%>"
-<% } %>
+
+import  (
+    "github.com/springstar/protogen/pb"
+    "github.com/jhump/protoreflect/desc"
+    "github.com/jhump/protoreflect/dynamic"   
+)
 
 <%="var descriptors map[int32]*desc.MessageDescriptor = make(map[int32]*desc.MessageDescriptor)"%>
 
