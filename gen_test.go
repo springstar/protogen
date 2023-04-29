@@ -36,7 +36,10 @@ func testCSLoing(t *testing.T, m *desc.MessageDescriptor) {
 	assert.Equal(t, int32(1), login.GetServerId())
 	assert.Equal(t, int32(1035), login.GetVersion())
 
+}
 
+func testSerialize(t *testing.T) {
+	
 }
 
 func TestDispatch(t *testing.T) {
@@ -54,6 +57,7 @@ func TestGenerate(t *testing.T) {
 	template := `
 	<%= for (n) in names { %>
 			<%= decl(n) <%= lbrack() %>
+
 				<%= "dmsg := dynamic.NewMessage(md)"%>
 			<%= rbrack() %>
 		<% } %>

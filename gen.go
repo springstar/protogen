@@ -19,6 +19,8 @@ var typeMap map[string]string = map[string]string{
 	"TYPE_INT32": "int32",
 	"TYPE_INT": "int",
 	"TYPE_INT64": "int64",
+	"TYPE_MESSAGE": "msg",
+	"TYPE_ENUM": "int32",
 }
 
 type ProtoGen struct {
@@ -126,11 +128,42 @@ func (g *ProtoGen) generate() {
 		return "}"
 	})
 
+	var tm map[string]string = make(map[string]string)
+
 	for _, fd := range g.fds {
-		fmt.Println(fd.GetType())
-		fmt.Println(fd.GetName())
-		
+		t := typeMap[fd.GetType().String()]
+		fmt.Println("type ", t)
+		fmt.Println("ot ", fd.GetType())
+		fmt.Println("name ", fd.GetName())
+		tm[t] = fd.GetName()
 	}
+
+	ctx.Set("params", func() string {
+		var sb strings.Builder
+		c := len(tm)
+		var i int = 0
+		for k, v := range tm {
+			sb.WriteString(v)
+			sb.WriteString(" ")
+			if k == "msg" {
+				var sbb strings.Builder
+				sbb.WriteString(" *pb.")
+				cname := strings.Title(v)
+				sbb.WriteString(cname)
+				sb.WriteString(sbb.String())
+
+			} else {
+				sb.WriteString(k)
+			}
+			
+			if i < c-1 {
+				sb.WriteString(", ")
+			}
+			i++
+		}
+
+		return sb.String()
+	})
 
 	s, err := plush.Render(template, ctx)
 	if (err != nil) {

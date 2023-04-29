@@ -43,14 +43,14 @@ func parseAddress(id int32, bytes []byte) *pb.Address {
 
 
 
-func serializeCSTest(id int32, bytes []byte) *pb.CSTest {
+func serializeCSTest(sex int32, user  *pb.User, money int64, code string) *pb.CSTest {
     return nil
 }
 
-func serializeCSLogin(id int32, bytes []byte) *pb.CSLogin {
+func serializeCSLogin(code string, sex int32, user  *pb.User, money int64) *pb.CSLogin {
     return nil
 }
 
-func serializeAddress(id int32, bytes []byte) *pb.Address {
+func serializeAddress(user  *pb.User, money int64, code string, sex int32) *pb.Address {
     return nil
 }
