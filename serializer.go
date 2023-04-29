@@ -13,15 +13,6 @@ func AddDescriptor(id int32, desc *desc.MessageDescriptor) {
 }
 
 
-func parseCSTest(id int32, bytes []byte) *pb.CSTest {
-    msg :=  &pb.CSTest{}
-    md := descriptors[id]
-    dmsg := dynamic.NewMessage(md)
-    dmsg.Unmarshal(bytes)
-    dmsg.ConvertTo(msg)
-    return msg
-}
-
 func parseCSLogin(id int32, bytes []byte) *pb.CSLogin {
     msg :=  &pb.CSLogin{}
     md := descriptors[id]
@@ -40,17 +31,26 @@ func parseAddress(id int32, bytes []byte) *pb.Address {
     return msg
 }
 
+func parseCSTest(id int32, bytes []byte) *pb.CSTest {
+    msg :=  &pb.CSTest{}
+    md := descriptors[id]
+    dmsg := dynamic.NewMessage(md)
+    dmsg.Unmarshal(bytes)
+    dmsg.ConvertTo(msg)
+    return msg
+}
 
 
 
-func serializeCSTest(sex int32, user  *pb.User, money int64, code string) *pb.CSTest {
+
+func serializeCSLogin(account string, password string, token string, serverId int32, version int32) *pb.CSLogin {
     return nil
 }
 
-func serializeCSLogin(code string, sex int32, user  *pb.User, money int64) *pb.CSLogin {
+func serializeAddress(state string, province string, city string, code int32, user  *pb.User, sex int32) *pb.Address {
     return nil
 }
 
-func serializeAddress(user  *pb.User, money int64, code string, sex int32) *pb.Address {
+func serializeCSTest(code string, money int64) *pb.CSTest {
     return nil
 }

@@ -23,10 +23,15 @@ var typeMap map[string]string = map[string]string{
 	"TYPE_ENUM": "int32",
 }
 
+type Field struct {
+	typ string
+	name string
+}
+
 type ProtoGen struct {
 	files []string
 	mds map[int32]*desc.MessageDescriptor
-	fds []*desc.FieldDescriptor
+	fids map[string][]*desc.FieldDescriptor
 	id2names map[int32]string
 
 }
@@ -35,6 +40,7 @@ func newProtoGen() *ProtoGen {
 	return &ProtoGen{
 		mds: make(map[int32]*desc.MessageDescriptor),
 		id2names: make(map[int32]string),
+		fids: make(map[string][]*desc.FieldDescriptor),
 	}
 }
 
@@ -70,13 +76,14 @@ func(g *ProtoGen) parse(path string) {
 		for _, fd := range fds {
 			mds := fd.GetMessageTypes()
 			for _, md := range mds {
-				fmt.Println(md.GetName())
 				options := md.GetOptions()
 				mid, _ := proto.GetExtension(options, pb.E_Msgid)
 				if (mid != nil) {
 					g.mds[ *mid.(*int32)] = md
 					g.id2names[*mid.(*int32)] = md.GetName()
-					g.fds = append(g.fds, md.GetFields()...)
+					var fids []*desc.FieldDescriptor
+					fids = append(fids, md.GetFields()...)
+					g.fids[md.GetName()] = fids
 				}
 			}
 		}
@@ -128,21 +135,31 @@ func (g *ProtoGen) generate() {
 		return "}"
 	})
 
-	var tm map[string]string = make(map[string]string)
+	var tm map[string][]Field = make(map[string][]Field)
+	
+	for name, fields := range g.fids {
+		var fids []Field
+		for _, field := range fields {
+			t := typeMap[field.GetType().String()]
+			fld := Field{
+				typ: t,
+				name: field.GetName(),
+			}
 
-	for _, fd := range g.fds {
-		t := typeMap[fd.GetType().String()]
-		fmt.Println("type ", t)
-		fmt.Println("ot ", fd.GetType())
-		fmt.Println("name ", fd.GetName())
-		tm[t] = fd.GetName()
+			fids = append(fids, fld)
+		}
+		
+		tm[name] = fids
 	}
 
-	ctx.Set("params", func() string {
+	ctx.Set("params", func(msg string) string {					
+		fields := tm[msg]
 		var sb strings.Builder
-		c := len(tm)
+		c := len(fields)
 		var i int = 0
-		for k, v := range tm {
+		for _, field := range fields {
+			k := field.typ
+			v := field.name
 			sb.WriteString(v)
 			sb.WriteString(" ")
 			if k == "msg" {
@@ -155,7 +172,7 @@ func (g *ProtoGen) generate() {
 			} else {
 				sb.WriteString(k)
 			}
-			
+
 			if i < c-1 {
 				sb.WriteString(", ")
 			}
@@ -169,7 +186,7 @@ func (g *ProtoGen) generate() {
 	if (err != nil) {
 		log.Fatal(err)
 	}
-
+	
 	write(s)
 
 	
