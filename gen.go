@@ -20,7 +20,7 @@ var typeMap map[string]string = map[string]string{
 	"TYPE_INT": "int",
 	"TYPE_INT64": "int64",
 	"TYPE_MESSAGE": "msg",
-	"TYPE_ENUM": "int32",
+	"TYPE_ENUM": "enum",
 }
 
 type Field struct {
@@ -152,6 +152,10 @@ func (g *ProtoGen) generate() {
 		tm[name] = fids
 	}
 
+	ctx.Set("", func() {
+	
+	})
+
 	ctx.Set("params", func(msg string) string {					
 		fields := tm[msg]
 		var sb strings.Builder
@@ -162,9 +166,14 @@ func (g *ProtoGen) generate() {
 			v := field.name
 			sb.WriteString(v)
 			sb.WriteString(" ")
-			if k == "msg" {
+			if k == "msg" || k == "enum" {
 				var sbb strings.Builder
-				sbb.WriteString(" *pb.")
+				if k == "msg" {
+					sbb.WriteString("*pb.")
+				} else {
+					sbb.WriteString("pb.")
+				}
+				
 				cname := strings.Title(v)
 				sbb.WriteString(cname)
 				sb.WriteString(sbb.String())
@@ -187,9 +196,7 @@ func (g *ProtoGen) generate() {
 		log.Fatal(err)
 	}
 	
-	write(s)
-
-	
+	write(s)	
 
 }
 

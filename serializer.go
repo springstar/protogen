@@ -44,13 +44,23 @@ func parseCSTest(id int32, bytes []byte) *pb.CSTest {
 
 
 func serializeCSLogin(account string, password string, token string, serverId int32, version int32) *pb.CSLogin {
-    return nil
+    msg := &pb.CSLogin{
+
+    }
+    return msg
 }
 
-func serializeAddress(state string, province string, city string, code int32, user  *pb.User, sex int32) *pb.Address {
-    return nil
+func serializeAddress(state string, province string, city string, code int32, user *pb.User, sex pb.Sex) *pb.Address {
+    msg := &pb.Address{
+		User: user,
+		Sex: sex,
+    }
+    return msg
 }
 
 func serializeCSTest(code string, money int64) *pb.CSTest {
-    return nil
+    msg := &pb.CSTest{
+
+    }
+    return msg
 }
