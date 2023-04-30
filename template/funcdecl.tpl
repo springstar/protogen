@@ -29,6 +29,11 @@ func AddDescriptor(id int32, desc *desc.MessageDescriptor) {
     msg := &pb.<%=n%>{
 
     }
+
+    <%= for (f) in fields(n) { %>
+    <%= "msg." %><%=capitalize(f)%> = <%=f%>
+    <% } %>
+
     return msg
 }
 <% } %>
