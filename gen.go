@@ -152,8 +152,13 @@ func (g *ProtoGen) generate() {
 		tm[name] = fids
 	}
 
-	ctx.Set("", func() {
-	
+	ctx.Set("fields", func(name string) []string {
+		var fns []string
+		fields := g.fids[name]
+		for _, f := range fields {
+			fns = append(fns, f.GetName())
+		}
+		return fns
 	})
 
 	ctx.Set("params", func(msg string) string {					

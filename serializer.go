@@ -47,14 +47,41 @@ func serializeCSLogin(account string, password string, token string, serverId in
     msg := &pb.CSLogin{
 
     }
+
+    
+    msg.Account = account
+    
+    msg.Password = password
+    
+    msg.Token = token
+    
+    msg.ServerId = serverId
+    
+    msg.Version = version
+    
+
     return msg
 }
 
 func serializeAddress(state string, province string, city string, code int32, user *pb.User, sex pb.Sex) *pb.Address {
     msg := &pb.Address{
-		User: user,
-		Sex: sex,
+
     }
+
+    
+    msg.State = state
+    
+    msg.Province = province
+    
+    msg.City = city
+    
+    msg.Code = code
+    
+    msg.User = user
+    
+    msg.Sex = sex
+    
+
     return msg
 }
 
@@ -62,5 +89,12 @@ func serializeCSTest(code string, money int64) *pb.CSTest {
     msg := &pb.CSTest{
 
     }
+
+    
+    msg.Code = code
+    
+    msg.Money = money
+    
+
     return msg
 }
