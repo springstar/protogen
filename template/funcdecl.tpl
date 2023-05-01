@@ -26,14 +26,9 @@ func AddDescriptor(id int32, desc *desc.MessageDescriptor) {
 
 <%= for (n) in names { %>
 <%="func serialize"%><%=n%>(<%=params(n)%>) *<%="pb."%><%=n%> {
-    msg := &pb.<%=n%>{
-
-    }
-
-    <%= for (f) in fields(n) { %>
-    <%= "msg." %><%=capitalize(f)%> = <%=f%>
-    <% } %>
-
+    msg := &pb.<%=n%>{}
+<%= for (f) in fields(n) {%>
+    <%="msg." %><%=capitalize(f)%> = <%=f%><% } %>
     return msg
 }
 <% } %>
