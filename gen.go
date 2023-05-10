@@ -21,11 +21,14 @@ var typeMap map[string]string = map[string]string{
 	"TYPE_INT64": "int64",
 	"TYPE_MESSAGE": "msg",
 	"TYPE_ENUM": "enum",
+	"TYPE_BOOL": "bool",
 }
 
 type Field struct {
 	typ string
 	name string
+	repeated bool
+	nested string
 }
 
 type ProtoGen struct {
@@ -146,11 +149,20 @@ func (g *ProtoGen) generate() {
 				name: field.GetName(),
 			}
 
+			if field.IsRepeated() {
+				fld.repeated = true
+				if field.GetMessageType() != nil {
+					fld.nested = field.GetMessageType().GetName()
+				}
+			}
+
+
 			fids = append(fids, fld)
 		}
 		
 		tm[name] = fids
 	}
+
 
 	ctx.Set("fields", func(name string) []string {
 		var fns []string
@@ -158,6 +170,7 @@ func (g *ProtoGen) generate() {
 		for _, f := range fields {
 			fns = append(fns, f.GetName())
 		}
+		
 		return fns
 	})
 
@@ -169,21 +182,38 @@ func (g *ProtoGen) generate() {
 		for _, field := range fields {
 			k := field.typ
 			v := field.name
+			repeated := field.repeated
+
 			sb.WriteString(v)
 			sb.WriteString(" ")
+
+
 			if k == "msg" || k == "enum" {
 				var sbb strings.Builder
 				if k == "msg" {
-					sbb.WriteString("*pb.")
+					if repeated {
+						sbb.WriteString("[]*pb.")						
+					} else {
+						sbb.WriteString("*pb.")						
+					}
 				} else {
 					sbb.WriteString("pb.")
 				}
 				
-				cname := strings.Title(v)
-				sbb.WriteString(cname)
+				if repeated {
+					sbb.WriteString(field.nested)
+				} else {
+					cname := strings.Title(v)
+					sbb.WriteString(cname)
+				}
+	
 				sb.WriteString(sbb.String())
 
 			} else {
+				if repeated {
+					sb.WriteString("[]")
+				}
+
 				sb.WriteString(k)
 			}
 
@@ -206,7 +236,7 @@ func (g *ProtoGen) generate() {
 }
 
 func write(s string) {
-    file, err := os.Create("serializer.go")
+    file, err := os.Create("msg/serializer.go")
     if err != nil {
         return
     }
