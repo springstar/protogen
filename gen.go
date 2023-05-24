@@ -25,10 +25,10 @@ var typeMap map[string]string = map[string]string{
 }
 
 type Field struct {
+	ptype string
 	typ string
 	name string
 	repeated bool
-	nested string
 }
 
 type ProtoGen struct {
@@ -135,7 +135,7 @@ func (g *ProtoGen) generate() {
 		protos = append(protos, p)
 	}
 
-	ctx.Set("package", "package main")
+	ctx.Set("package", "package msg")
 	ctx.Set("imports", func() []string {
 		return []string{
 			"github.com/springstar/protogen/pb",
@@ -171,22 +171,29 @@ func (g *ProtoGen) generate() {
 		var fids []Field
 		for _, field := range fields {
 			t := typeMap[field.GetType().String()]
-			fld := Field{
-				typ: t,
-				name: field.GetName(),
+
+			var fld Field
+			
+			if field.GetMessageType() != nil {
+				fld.typ = field.GetMessageType().GetName()
+			} else if field.GetEnumType() != nil {
+				fld.typ = field.GetEnumType().GetName()
+			} else {
+				fld.typ = t
 			}
+
+			fld.ptype = t
+
+			fld.name = field.GetName()
+			fmt.Printf("%s, %s, %s\n", fld.typ, fld.ptype, fld.name)
 
 			if field.IsRepeated() {
 				fld.repeated = true
-				if field.GetMessageType() != nil {
-					fld.nested = field.GetMessageType().GetName()
-				}
 			}
-
 
 			fids = append(fids, fld)
 		}
-		
+
 		tm[name] = fids
 	}
 
@@ -209,15 +216,15 @@ func (g *ProtoGen) generate() {
 		for _, field := range fields {
 			k := field.typ
 			v := field.name
+			pt := field.ptype
 			repeated := field.repeated
 
 			sb.WriteString(v)
 			sb.WriteString(" ")
 
-
-			if k == "msg" || k == "enum" {
+			if pt == "msg" || pt == "enum" {
 				var sbb strings.Builder
-				if k == "msg" {
+				if pt == "msg" {
 					if repeated {
 						sbb.WriteString("[]*pb.")						
 					} else {
@@ -226,13 +233,9 @@ func (g *ProtoGen) generate() {
 				} else {
 					sbb.WriteString("pb.")
 				}
-				
-				if repeated {
-					sbb.WriteString(field.nested)
-				} else {
-					cname := strings.Title(v)
-					sbb.WriteString(cname)
-				}
+
+				// cname := strings.Title(k)
+				sbb.WriteString(k)
 	
 				sb.WriteString(sbb.String())
 
