@@ -185,7 +185,7 @@ func (g *ProtoGen) generate() {
 			fld.ptype = t
 
 			fld.name = field.GetName()
-			fmt.Printf("%s, %s, %s\n", fld.typ, fld.ptype, fld.name)
+			// fmt.Printf("%s, %s, %s\n", fld.typ, fld.ptype, fld.name)
 
 			if field.IsRepeated() {
 				fld.repeated = true
