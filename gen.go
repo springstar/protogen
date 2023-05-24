@@ -47,6 +47,26 @@ func newProtoGen() *ProtoGen {
 	}
 }
 
+func readTemplate(tpl string) string {
+	content, err := ioutil.ReadFile(tpl)
+	if (err != nil) {
+		log.Fatal(err)
+	}
+
+	template := string(content[:])
+	return template
+}
+
+func writeFile(s string, f string) {
+    file, err := os.Create(f)
+    if err != nil {
+        return
+    }
+    defer file.Close()
+
+    file.WriteString(s)
+}
+
 func(g *ProtoGen) parse(path string) {
 	files, err := ioutil.ReadDir(path)
 	if (err != nil) {
@@ -92,16 +112,23 @@ func(g *ProtoGen) parse(path string) {
 		}
 	}
 
-}
 
-func (g *ProtoGen) generate() {
-	content, err := ioutil.ReadFile("template/funcdecl.tpl")
+	template := readTemplate("template/msgid.tpl")
+	ctx := plush.NewContext()
+
+	ctx.Set("id2names", g.id2names)
+
+	s, err := plush.Render(template, ctx)
 	if (err != nil) {
 		log.Fatal(err)
 	}
 
-	template := string(content[:])
+	writeFile(s, "msg/msgid.go")
 
+}
+
+func (g *ProtoGen) generate() {
+	template := readTemplate("template/funcdecl.tpl")
 	ctx := plush.NewContext()
 	var protos []string
 	for _, p := range g.id2names {
@@ -231,19 +258,10 @@ func (g *ProtoGen) generate() {
 		log.Fatal(err)
 	}
 	
-	write(s)	
+	writeFile(s, "msg/serializer.go")	
 
 }
 
-func write(s string) {
-    file, err := os.Create("msg/serializer.go")
-    if err != nil {
-        return
-    }
-    defer file.Close()
-
-    file.WriteString(s)
-}
 
 
 
