@@ -22,6 +22,7 @@ var typeMap map[string]string = map[string]string{
 	"TYPE_MESSAGE": "msg",
 	"TYPE_ENUM": "enum",
 	"TYPE_BOOL": "bool",
+	"TYPE_DOUBLE": "float64",
 }
 
 type Field struct {
@@ -170,6 +171,7 @@ func (g *ProtoGen) generate() {
 	for name, fields := range g.fids {
 		var fids []Field
 		for _, field := range fields {
+			// fmt.Println(field.GetType().String())
 			t := typeMap[field.GetType().String()]
 
 			var fld Field
